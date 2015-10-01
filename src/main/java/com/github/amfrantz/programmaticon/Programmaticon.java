@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,8 @@ public class Programmaticon {
     private static final int HEAD_SIZE_MIN = 100;
     private static final int HEAD_SIZE_MAX = 115;
 
+    private static Color stone = new Color(158, 164, 171);
+    private static Color seattle = new Color(225, 227, 232);
     private static Color cotton = new Color(243, 244, 246);
 
     private static Color gold = new Color(242, 174, 0);
@@ -42,14 +45,50 @@ public class Programmaticon {
         Graphics2D graphics = (Graphics2D) composite.getGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-
         // background
-        Color backgroundColor = getRandomColor(null);
+        Color backgroundColor = cotton;
         graphics.setColor(backgroundColor);
         graphics.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+        Color logoColor = getRandomColor(null);
+        int randomXOffset = getRandomInRange(0, 30);
+        int randomYOffset = getRandomInRange(0, 20);
+        int x = 0 - randomXOffset;
+        int originalX = x;
+        int y = 20 - randomYOffset;
+        int rowCount = 0;
+        while (y < CANVAS_HEIGHT) {
+            if (rowCount % 2 == 0) { // normal row
+                int logoCount = 0;
+                while (x < CANVAS_WIDTH) {
+                    if (logoCount % 2 == 0) {
+                        drawLogo(graphics, logoColor.brighter(), logoColor, x, y);
+                    } else {
+                        drawLogo(graphics, seattle, stone, x, y);
+                    }
+                    x += 60;
+                    logoCount++;
+                }
+            } else { // inverted row
+                x -= 30;
+                int logoCount = 0;
+                while (x < CANVAS_WIDTH) {
+                    if (logoCount % 2 == 0) {
+                        drawLogo(graphics, logoColor.brighter(), stone, x, y);
+                    } else {
+                        drawLogo(graphics, seattle, logoColor, x, y);
+                    }
+                    x += 60;
+                    logoCount++;
+                }
+            }
+            x = originalX;
+            y += 40;
+            rowCount++;
+        }
+
         // body (make sure it isn't the same as the background
-        Color bodyColor = getRandomColor(backgroundColor);
+        Color bodyColor = getRandomColor(logoColor);
         graphics.setColor(bodyColor);
         int bodyWidth = getRandomInRange(BODY_WIDTH_MIN, BODY_WIDTH_MAX);
         int bodyHeight = getRandomInRange(BODY_HEIGHT_MIN, BODY_HEIGHT_MAX);
@@ -67,15 +106,36 @@ public class Programmaticon {
 
         // initials
         String initials = getUserInitials();
-        graphics.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 65));
+        graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 70));
         FontMetrics fm = graphics.getFontMetrics();
         int initialsWidth = fm.stringWidth(initials);
         int initialsHeight = fm.getAscent();
         int initialsX = CANVAS_WIDTH / 2 - initialsWidth / 2;
-        int initialsY = headY + headSize + (CANVAS_HEIGHT - (headY + headSize)) / 2 + initialsHeight / 2;
+        // position vertically between the "chin" and the bottom of the canvas.
+        int initialsY = headY + headSize + (CANVAS_HEIGHT - (headY + headSize)) / 2 + initialsHeight / 2 - 5;
         graphics.drawString(initials, initialsX, initialsY);
 
         ImageIO.write(composite, "png", new File("composite.png"));
+    }
+
+    private static void drawLogo(Graphics2D graphics, Color left, Color right, int x, int y) {
+        graphics.setColor(left);
+        Path2D.Double leftHalf = new Path2D.Double();
+        leftHalf.moveTo(x, y);
+        leftHalf.lineTo(x + 30, y - 20);
+        leftHalf.lineTo(x + 30, y);
+        leftHalf.lineTo(x, y + 20);
+        leftHalf.closePath();
+        graphics.fill(leftHalf);
+
+        graphics.setColor(right);
+        Path2D.Double rightHalf = new Path2D.Double();
+        rightHalf.moveTo(x + 30, y - 20);
+        rightHalf.lineTo(x + 60, y);
+        rightHalf.lineTo(x + 60, y + 20);
+        rightHalf.lineTo(x + 30, y);
+        rightHalf.closePath();
+        graphics.fill(rightHalf);
     }
 
     private static Color getRandomColor(Color exclusion) {
