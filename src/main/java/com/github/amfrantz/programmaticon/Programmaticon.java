@@ -28,6 +28,7 @@ public class Programmaticon {
     private static final int HEAD_SIZE_MIN = 100;
     private static final int HEAD_SIZE_MAX = 115;
 
+    private static Color transparentCoal = new Color(61, 69, 77, 50);
     private static Color stone = new Color(158, 164, 171);
     private static Color seattle = new Color(225, 227, 232);
     private static Color cotton = new Color(243, 244, 246);
@@ -39,18 +40,40 @@ public class Programmaticon {
 
     private static final List<Color> availableColors = Arrays.asList(gold, teal, ruby, blue);
 
+    private static Color getRandomColor(Color exclusion) {
+        Color selection;
+        do {
+            int index = new Random().nextInt(availableColors.size());
+            selection = availableColors.get(index);
+        } while (selection == exclusion);
+        return selection;
+    }
+
+    private static int getRandomInRange(int min, int max) {
+        return new Random().nextInt(max - min + 1) + min;
+    }
+
     public static void main(String[] args) throws IOException {
         BufferedImage composite = new BufferedImage(CANVAS_WIDTH, CANVAS_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-
         Graphics2D graphics = (Graphics2D) composite.getGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // background
-        Color backgroundColor = cotton;
-        graphics.setColor(backgroundColor);
-        graphics.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawBackground(graphics, cotton);
 
-        Color logoColor = getRandomColor(null);
+        Color wallpaperColor = getRandomColor(null);
+        drawWallpaper(graphics, wallpaperColor);
+
+        drawPerson(graphics, wallpaperColor);
+
+        ImageIO.write(composite, "png", new File("composite.png"));
+    }
+
+    private static void drawBackground(Graphics2D graphics, Color color) {
+        graphics.setColor(color);
+        graphics.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+
+    private static void drawWallpaper(Graphics2D graphics, Color color) {
         int randomXOffset = getRandomInRange(0, 30);
         int randomYOffset = getRandomInRange(0, 20);
         int x = 0 - randomXOffset;
@@ -62,7 +85,7 @@ public class Programmaticon {
                 int logoCount = 0;
                 while (x < CANVAS_WIDTH) {
                     if (logoCount % 2 == 0) {
-                        drawLogo(graphics, logoColor.brighter(), logoColor, x, y);
+                        drawLogo(graphics, color.brighter(), color, x, y);
                     } else {
                         drawLogo(graphics, seattle, stone, x, y);
                     }
@@ -74,9 +97,9 @@ public class Programmaticon {
                 int logoCount = 0;
                 while (x < CANVAS_WIDTH) {
                     if (logoCount % 2 == 0) {
-                        drawLogo(graphics, logoColor.brighter(), stone, x, y);
+                        drawLogo(graphics, color.brighter(), stone, x, y);
                     } else {
-                        drawLogo(graphics, seattle, logoColor, x, y);
+                        drawLogo(graphics, seattle, color, x, y);
                     }
                     x += 60;
                     logoCount++;
@@ -86,36 +109,7 @@ public class Programmaticon {
             y += 40;
             rowCount++;
         }
-
-        // body (make sure it isn't the same as the background
-        Color bodyColor = getRandomColor(logoColor);
-        graphics.setColor(bodyColor);
-        int bodyWidth = getRandomInRange(BODY_WIDTH_MIN, BODY_WIDTH_MAX);
-        int bodyHeight = getRandomInRange(BODY_HEIGHT_MIN, BODY_HEIGHT_MAX);
-        int bodyX = CANVAS_WIDTH / 2 - bodyWidth / 2;
-        int bodyY = CANVAS_HEIGHT - bodyHeight / 2;
-
-        graphics.fillOval(bodyX, bodyY, bodyWidth, bodyHeight);
-
-        // head
-        graphics.setColor(cotton);
-        int headSize = getRandomInRange(HEAD_SIZE_MIN, HEAD_SIZE_MAX);
-        int headX = CANVAS_WIDTH / 2 - headSize / 2;
-        int headY = CANVAS_HEIGHT - bodyHeight / 2 - ((headSize / 4) * 3);
-        graphics.fillOval(headX, headY, headSize, headSize);
-
-        // initials
-        String initials = getUserInitials();
-        graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 70));
-        FontMetrics fm = graphics.getFontMetrics();
-        int initialsWidth = fm.stringWidth(initials);
-        int initialsHeight = fm.getAscent();
-        int initialsX = CANVAS_WIDTH / 2 - initialsWidth / 2;
-        // position vertically between the "chin" and the bottom of the canvas.
-        int initialsY = headY + headSize + (CANVAS_HEIGHT - (headY + headSize)) / 2 + initialsHeight / 2 - 5;
-        graphics.drawString(initials, initialsX, initialsY);
-
-        ImageIO.write(composite, "png", new File("composite.png"));
+        drawBackground(graphics, transparentCoal);
     }
 
     private static void drawLogo(Graphics2D graphics, Color left, Color right, int x, int y) {
@@ -138,20 +132,33 @@ public class Programmaticon {
         graphics.fill(rightHalf);
     }
 
-    private static Color getRandomColor(Color exclusion) {
-        Color selection;
-        do {
-            int index = new Random().nextInt(availableColors.size());
-            selection = availableColors.get(index);
-        } while (selection == exclusion);
-        return selection;
+    private static void drawPerson(Graphics2D graphics, Color exclusion) {
+        int bodyW = getRandomInRange(BODY_WIDTH_MIN, BODY_WIDTH_MAX);
+        int bodyH = getRandomInRange(BODY_HEIGHT_MIN, BODY_HEIGHT_MAX);
+        int bodyX = CANVAS_WIDTH / 2 - bodyW / 2;
+        int bodyY = CANVAS_HEIGHT - bodyH / 2;
+        graphics.setColor(getRandomColor(exclusion));
+        graphics.fillOval(bodyX, bodyY, bodyW, bodyH);
+
+        int head = getRandomInRange(HEAD_SIZE_MIN, HEAD_SIZE_MAX);
+        int headX = CANVAS_WIDTH / 2 - head / 2;
+        int headY = CANVAS_HEIGHT - bodyH / 2 - (head / 4 * 3);
+        graphics.setColor(cotton);
+        graphics.fillOval(headX, headY, head, head);
+
+        String initials = getRandomInitials();
+        graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 70));
+        FontMetrics fm = graphics.getFontMetrics();
+        int initialsW = fm.stringWidth(initials);
+        int initialsH = fm.getAscent();
+        int initialsX = CANVAS_WIDTH / 2 - initialsW / 2;
+        // position vertically between the "chin" and the bottom of the canvas.
+        int chinY = headY + head;
+        int initialsY = chinY + (CANVAS_HEIGHT - chinY) / 2 + initialsH / 2 - 5;
+        graphics.drawString(initials, initialsX, initialsY);
     }
 
-    private static int getRandomInRange(int min, int max) {
-        return new Random().nextInt(max - min + 1) + min;
-    }
-
-    private static String getUserInitials() {
+    private static String getRandomInitials() {
         Random r = new Random();
         String a = String.valueOf((char) (r.nextInt(26) + 'a')).toUpperCase();
         String b = String.valueOf((char) (r.nextInt(26) + 'a')).toUpperCase();
