@@ -20,6 +20,9 @@ public class Programmaticon {
     private static final int CANVAS_WIDTH = 227;
     private static final int CANVAS_HEIGHT = 227;
 
+    private static final int LOGO_HEIGHT_MIN = 40;
+    private static final int LOGO_HEIGHT_MAX = 60;
+
     private static final int BODY_WIDTH_MIN = 125;
     private static final int BODY_WIDTH_MAX = 160;
     private static final int BODY_HEIGHT_MIN = 200;
@@ -61,7 +64,7 @@ public class Programmaticon {
         drawBackground(graphics, cotton);
 
         Color wallpaperColor = getRandomColor(null);
-        int logoHeight = getRandomInRange(40, 60);
+        int logoHeight = getRandomInRange(LOGO_HEIGHT_MIN, LOGO_HEIGHT_MAX);
         drawWallpaper(graphics, logoHeight, wallpaperColor);
 
         drawPerson(graphics, wallpaperColor);
@@ -78,8 +81,8 @@ public class Programmaticon {
         int width = ((Double) (height * 1.5)).intValue();
         int halfW = width / 2;
         int halfH = height / 2;
-        int offsetX = -getRandomInRange(0, halfW);
-        int offsetY = -getRandomInRange(0, halfH);
+        int offsetX = -getRandomInRange(width / 16, halfW);
+        int offsetY = -getRandomInRange(height / 16, halfH);
         int x = offsetX;
         int y = offsetY + halfH;
 
