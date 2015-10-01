@@ -61,7 +61,8 @@ public class Programmaticon {
         drawBackground(graphics, cotton);
 
         Color wallpaperColor = getRandomColor(null);
-        drawWallpaper(graphics, wallpaperColor);
+        int logoHeight = getRandomInRange(40, 60);
+        drawWallpaper(graphics, logoHeight, wallpaperColor);
 
         drawPerson(graphics, wallpaperColor);
 
@@ -73,61 +74,64 @@ public class Programmaticon {
         graphics.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 
-    private static void drawWallpaper(Graphics2D graphics, Color color) {
-        int randomXOffset = getRandomInRange(0, 30);
-        int randomYOffset = getRandomInRange(0, 20);
-        int x = 0 - randomXOffset;
-        int originalX = x;
-        int y = 20 - randomYOffset;
+    private static void drawWallpaper(Graphics2D graphics, int height, Color color) {
+        int width = ((Double) (height * 1.5)).intValue();
+        int halfW = width / 2;
+        int halfH = height / 2;
+        int offsetX = -getRandomInRange(0, halfW);
+        int offsetY = -getRandomInRange(0, halfH);
+        int x = offsetX;
+        int y = offsetY + halfH;
+
         int rowCount = 0;
-        while (y < CANVAS_HEIGHT) {
+        while (y <= CANVAS_HEIGHT + halfH) {
             if (rowCount % 2 == 0) { // normal row
-                int logoCount = 0;
-                while (x < CANVAS_WIDTH) {
-                    if (logoCount % 2 == 0) {
-                        drawLogo(graphics, color.brighter(), color, x, y);
-                    } else {
-                        drawLogo(graphics, seattle, stone, x, y);
-                    }
-                    x += 60;
-                    logoCount++;
-                }
+                drawRow(graphics, color.brighter(), color, seattle, stone, x, y, width, height);
+
             } else { // inverted row
-                x -= 30;
-                int logoCount = 0;
-                while (x < CANVAS_WIDTH) {
-                    if (logoCount % 2 == 0) {
-                        drawLogo(graphics, color.brighter(), stone, x, y);
-                    } else {
-                        drawLogo(graphics, seattle, color, x, y);
-                    }
-                    x += 60;
-                    logoCount++;
-                }
+                x -= halfW;
+                drawRow(graphics, color.brighter(), stone, seattle, color, x, y, width, height);
             }
-            x = originalX;
-            y += 40;
+            x = offsetX;
+            y += height;
             rowCount++;
         }
+
         drawBackground(graphics, transparentCoal);
     }
 
-    private static void drawLogo(Graphics2D graphics, Color left, Color right, int x, int y) {
+    private static int drawRow(Graphics2D graphics, Color evenLight, Color evenDark, Color oddLight, Color oddDark, int x, int y, int width, int height) {
+        int count = 0;
+        while (x <= CANVAS_WIDTH) {
+            if (count % 2 == 0) {
+                drawLogo(graphics, evenLight, evenDark, x, y, width, height);
+            } else {
+                drawLogo(graphics, oddLight, oddDark, x, y, width, height);
+            }
+            x += width;
+            count++;
+        }
+        return x;
+    }
+
+    private static void drawLogo(Graphics2D graphics, Color left, Color right, int x, int y, int width, int height) {
+        int halfW = width / 2;
+        int halfH = height / 2;
         graphics.setColor(left);
         Path2D.Double leftHalf = new Path2D.Double();
         leftHalf.moveTo(x, y);
-        leftHalf.lineTo(x + 30, y - 20);
-        leftHalf.lineTo(x + 30, y);
-        leftHalf.lineTo(x, y + 20);
+        leftHalf.lineTo(x + halfW, y - halfH);
+        leftHalf.lineTo(x + halfW, y);
+        leftHalf.lineTo(x, y + halfH);
         leftHalf.closePath();
         graphics.fill(leftHalf);
 
         graphics.setColor(right);
         Path2D.Double rightHalf = new Path2D.Double();
-        rightHalf.moveTo(x + 30, y - 20);
-        rightHalf.lineTo(x + 60, y);
-        rightHalf.lineTo(x + 60, y + 20);
-        rightHalf.lineTo(x + 30, y);
+        rightHalf.moveTo(x + halfW, y - halfH);
+        rightHalf.lineTo(x + width, y);
+        rightHalf.lineTo(x + width, y + halfH);
+        rightHalf.lineTo(x + halfW, y);
         rightHalf.closePath();
         graphics.fill(rightHalf);
     }
