@@ -31,7 +31,7 @@ public class Programmaticon {
     private static final int HEAD_SIZE_MIN = 100;
     private static final int HEAD_SIZE_MAX = 115;
 
-    private static Color transparentCoal = new Color(61, 69, 77, 50);
+    private static Color transparentCoal = new Color(61, 69, 77, 70);
     private static Color stone = new Color(158, 164, 171);
     private static Color seattle = new Color(225, 227, 232);
     private static Color cotton = new Color(243, 244, 246);
@@ -144,12 +144,21 @@ public class Programmaticon {
         int bodyH = getRandomInRange(BODY_HEIGHT_MIN, BODY_HEIGHT_MAX);
         int bodyX = CANVAS_WIDTH / 2 - bodyW / 2;
         int bodyY = CANVAS_HEIGHT - bodyH / 2;
-        graphics.setColor(getRandomColor(exclusion));
+        Color bodyColor = getRandomColor(exclusion);
+        graphics.setColor(bodyColor);
         graphics.fillOval(bodyX, bodyY, bodyW, bodyH);
 
         int head = getRandomInRange(HEAD_SIZE_MIN, HEAD_SIZE_MAX);
         int headX = CANVAS_WIDTH / 2 - head / 2;
         int headY = CANVAS_HEIGHT - bodyH / 2 - (head / 4 * 3);
+
+        int shadowW = ((Double)(bodyW * .45)).intValue();
+        int shadowH = head / 4;
+        int shadowX = (bodyW - shadowW) / 2 + bodyX + 5;
+        int shadowY = headY + head - ((Double)(shadowH * .65)).intValue();
+        graphics.setColor(bodyColor.darker());
+        graphics.fillOval(shadowX, shadowY, shadowW, shadowH);
+
         graphics.setColor(cotton);
         graphics.fillOval(headX, headY, head, head);
 
