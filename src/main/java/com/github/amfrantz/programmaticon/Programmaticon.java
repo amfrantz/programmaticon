@@ -17,10 +17,13 @@ import java.util.Random;
 
 public class Programmaticon {
 
+    private static final boolean drawWallpaper = false;
+    private static final boolean drawInitials = false;
+
     private static final int CANVAS_WIDTH = 227;
     private static final int CANVAS_HEIGHT = 227;
 
-    private static final int LOGO_HEIGHT_MIN = 40;
+    private static final int LOGO_HEIGHT_MIN = 45;
     private static final int LOGO_HEIGHT_MAX = 60;
 
     private static final int BODY_WIDTH_MIN = 125;
@@ -65,7 +68,11 @@ public class Programmaticon {
 
         Color wallpaperColor = getRandomColor(null);
         int logoHeight = getRandomInRange(LOGO_HEIGHT_MIN, LOGO_HEIGHT_MAX);
-        drawWallpaper(graphics, logoHeight, wallpaperColor);
+        if (drawWallpaper) {
+            drawWallpaper(graphics, logoHeight, wallpaperColor);
+        } else {
+            drawBackground(graphics, wallpaperColor);
+        }
 
         drawPerson(graphics, wallpaperColor);
 
@@ -162,16 +169,18 @@ public class Programmaticon {
         graphics.setColor(cotton);
         graphics.fillOval(headX, headY, head, head);
 
-        String initials = getRandomInitials();
-        graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 70));
-        FontMetrics fm = graphics.getFontMetrics();
-        int initialsW = fm.stringWidth(initials);
-        int initialsH = fm.getAscent();
-        int initialsX = CANVAS_WIDTH / 2 - initialsW / 2;
-        // position vertically between the "chin" and the bottom of the canvas.
-        int chinY = headY + head;
-        int initialsY = chinY + (CANVAS_HEIGHT - chinY) / 2 + initialsH / 2 - 5;
-        graphics.drawString(initials, initialsX, initialsY);
+        if (drawInitials) {
+            String initials = getRandomInitials();
+            graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 70));
+            FontMetrics fm = graphics.getFontMetrics();
+            int initialsW = fm.stringWidth(initials);
+            int initialsH = fm.getAscent();
+            int initialsX = CANVAS_WIDTH / 2 - initialsW / 2;
+            // position vertically between the "chin" and the bottom of the canvas.
+            int chinY = headY + head;
+            int initialsY = chinY + (CANVAS_HEIGHT - chinY) / 2 + initialsH / 2 - 5;
+            graphics.drawString(initials, initialsX, initialsY);
+        }
     }
 
     private static String getRandomInitials() {
